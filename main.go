@@ -6,12 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sing3demons/golanh-api/config"
 	"github.com/sing3demons/golanh-api/controller"
+	"github.com/sing3demons/golanh-api/repository"
+	"github.com/sing3demons/golanh-api/service"
 	"gorm.io/gorm"
 )
 
 var (
 	db             *gorm.DB                  = config.SetupDatabaseConnection()
-	authController controller.AuthController = controller.NewAuthController()
+	userRepository repository.UserRepository = repository.NewUserRepository(db)
+	authService    service.AuthService       = service.NewAuthService(userRepository)
+	jwtService     service.JWTService        = service.NewJWTService()
+	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
 )
 
 func main() {

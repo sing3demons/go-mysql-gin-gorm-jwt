@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/sing3demons/golanh-api/entity"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -27,7 +28,7 @@ func SetupDatabaseConnection() *gorm.DB {
 
 	}
 
-	// dbCon.AutoMigrate(&models.Blog{})
+	db.AutoMigrate(&entity.Book{}, &entity.User{})
 
 	return db
 }
