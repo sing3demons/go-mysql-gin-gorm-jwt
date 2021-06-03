@@ -29,18 +29,19 @@ func NewAuthController(authService service.AuthService, jwtService service.JWTSe
 }
 
 func (c *authController) Login(ctx *gin.Context) {
-	var form dto.LoginDTO
-	if err := ctx.ShouldBind(&form); err != nil {
-		resp := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, resp)
+	var loginDTO dto.LoginDTO
+	errDTO := ctx.ShouldBind(&loginDTO)
+	if errDTO != nil {
+		response := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
-	authResult := c.authService.VerifyCredential(form.Email, form.Password)
+	authResult := c.authService.VerifyCredential(loginDTO.Email, loginDTO.Password)
 	if v, ok := authResult.(entity.User); ok {
 		generatedToken := c.jwtService.GenerateToken(strconv.FormatUint(v.ID, 10))
 		v.Token = generatedToken
-		resp := helper.BuildResponse(true, "OK!", v)
-		ctx.JSON(http.StatusOK, resp)
+		response := helper.BuildResponse(true, "OK!", v)
+		ctx.JSON(http.StatusOK, response)
 		return
 	}
 	response := helper.BuildErrorResponse("Please check again your credential", "Invalid Credential", helper.EmptyObj{})
@@ -63,6 +64,6 @@ func (a *authController) Register(ctx *gin.Context) {
 		token := a.jwtService.GenerateToken(strconv.FormatUint(createdUser.ID, 10))
 		createdUser.Token = token
 		response := helper.BuildResponse(true, "OK!", createdUser)
-		ctx.JSON(http.StatusCreated,response)
+		ctx.JSON(http.StatusCreated, response)
 	}
 }

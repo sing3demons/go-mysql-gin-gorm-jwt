@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sing3demons/golanh-api/config"
 	"github.com/sing3demons/golanh-api/controller"
+	"github.com/sing3demons/golanh-api/middleware"
 	"github.com/sing3demons/golanh-api/repository"
 	"github.com/sing3demons/golanh-api/service"
 	"gorm.io/gorm"
@@ -16,7 +17,9 @@ var (
 	userRepository repository.UserRepository = repository.NewUserRepository(db)
 	authService    service.AuthService       = service.NewAuthService(userRepository)
 	jwtService     service.JWTService        = service.NewJWTService()
+	userService    service.UserService       = service.NewUserService(userRepository)
 	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
+	userController controller.UserController = controller.NewUserController(userService, jwtService)
 )
 
 func main() {
@@ -28,6 +31,12 @@ func main() {
 	{
 		authRoutes.POST("/login", authController.Login)
 		authRoutes.POST("/register", authController.Register)
+	}
+
+	userRoutes := r.Group("api/v1/user", middleware.AuthorizeJWT(jwtService))
+	{
+		userRoutes.GET("profile", userController.Profile)
+		userRoutes.PUT("profile", userController.Update)
 	}
 
 	r.Run(":" + os.Getenv("PORT"))

@@ -11,23 +11,22 @@ import (
 )
 
 func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		authHeader := ctx.GetHeader("Authorization")
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			response := helper.BuildErrorResponse("Failed to process request", "No token found", nil)
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+			c.AbortWithStatusJSON(http.StatusBadRequest, response)
 			return
 		}
 		token, err := jwtService.ValidateToken(authHeader)
 		if token.Valid {
 			claims := token.Claims.(jwt.MapClaims)
-			log.Panicln("Claim[user_id]: ", claims["user_id"])
-			log.Panicln("Claim[issuer]: ", claims["issuer"])
+			log.Println("Claim[user_id]: ", claims["user_id"])
+			log.Println("Claim[issuer] :", claims["issuer"])
 		} else {
-			log.Panicln(err)
+			log.Println(err)
 			response := helper.BuildErrorResponse("Token is not valid", err.Error(), nil)
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 		}
-
 	}
 }
