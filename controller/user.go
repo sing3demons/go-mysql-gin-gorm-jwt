@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -37,7 +38,7 @@ func (c *userController) Update(ctx *gin.Context) {
 		return
 	}
 
-	authHeader := ctx.GetHeader("Authorization")
+	authHeader := strings.Split(ctx.Request.Header["Authorization"][0], " ")[1]
 	token, err := c.jwtService.ValidateToken(authHeader)
 	if err != nil {
 		panic(err.Error())
@@ -54,7 +55,7 @@ func (c *userController) Update(ctx *gin.Context) {
 
 }
 func (c *userController) Profile(ctx *gin.Context) {
-	authHeader := ctx.GetHeader("Authorization")
+	authHeader := strings.Split(ctx.Request.Header["Authorization"][0], " ")[1]
 	token, err := c.jwtService.ValidateToken(authHeader)
 	if err != nil {
 		panic(err.Error())

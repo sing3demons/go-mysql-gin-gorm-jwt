@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -68,7 +69,7 @@ func (c *bookController) Insert(ctx *gin.Context) {
 		return
 	}
 
-	authHeader := ctx.GetHeader("Authorization")
+	authHeader := strings.Split(ctx.Request.Header["Authorization"][0], " ")[1]
 	userID := c.getUserIDByToken(authHeader)
 	convertedUserID, err := strconv.ParseUint(userID, 10, 64)
 	if err == nil {
@@ -85,7 +86,7 @@ func (c *bookController) Update(ctx *gin.Context) {
 		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
 	} else {
-		authHeader := ctx.GetHeader("Authorization")
+		authHeader := strings.Split(ctx.Request.Header["Authorization"][0], " ")[1]
 		userID := c.getUserIDByToken(authHeader)
 		convertedUserID, err := strconv.ParseUint(userID, 10, 64)
 		if err == nil {
@@ -104,7 +105,7 @@ func (c *bookController) Delete(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, response)
 	}
 	book.ID = id
-	authHeader := ctx.GetHeader("Authorization")
+	authHeader := strings.Split(ctx.Request.Header["Authorization"][0], " ")[1]
 	token, errToken := c.jwtService.ValidateToken(authHeader)
 	if errToken != nil {
 		panic(errToken.Error())
